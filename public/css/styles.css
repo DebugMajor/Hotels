@@ -1,0 +1,135 @@
+.plus-jakarta-sans {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400; 
+  font-style: normal;
+}
+
+body{
+    font-family: "Plus Jakarta Sans"!important;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container
+{
+    flex:1s;
+}
+
+/* Navbar */
+.navbar {
+  height: 5rem;
+  background-color: white;
+}
+.fa-compass {
+  color: #fe424d;
+  font-size: 2rem;
+}
+.nav-link {
+  color: black !important;
+}
+
+/* Footer */
+.f-info-links a {
+  text-decoration: none;
+  color: #222;
+}
+.f-info-links a:hover {
+  text-decoration: underline;
+}
+.f-info-links {
+  width: 100%;
+}
+
+.f-info-socials,
+.f-info-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  width: 100%;
+  margin-right: 10px;
+}
+.f-info-socials i {
+  margin-right: 10px;
+  margin-top: 10px;
+}
+.f-info-socials i:hover {
+  font-size: 2rem;
+}
+
+.f-info {
+  text-align: center;
+  display: flex;
+  height: 8rem;
+  background-color: #ebebeb;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+/* Cards */
+.card {
+  border: none !important;
+  margin-bottom: 2rem;
+}
+.card-img-top {
+  border-radius: 1rem !important;
+  width: 100% !important;
+  object-fit: cover !important;
+}
+.card-body {
+  padding: 0;
+}
+.card-text {
+  font-weight: 400;
+  
+}
+
+
+.page-content {
+    padding: 2rem 1rem;       /* Add some top/bottom padding */
+    margin-bottom: 4rem;      /* Ensure space above footer */
+}
+
+.page-content h3 {
+    margin-bottom: 1.5rem;
+}
+
+.page-content ul {
+    list-style: none;
+    padding: 0;
+}
+
+.page-content ul li {
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.page-content a.btn,
+.page-content button.btn {
+    margin-top: 1rem;
+    margin-right: 1rem;
+}
+
+
+.listing-link
+{
+    text-decoration: none;
+}
+
+/* Card Styling */
+.card-img-overlay
+{
+    opacity: 0;
+}
+
+.card-img-overlay:hover
+{
+    opacity: 0.2;
+    background-color: white;
+}
+
+
+
