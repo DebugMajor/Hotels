@@ -1,34 +1,38 @@
-# Hotels – Sample Airbnb Clone
+# Hotels – Airbnb Clone (MERN Stack)
 
-This is a **sample Airbnb-style web application** built to practice the **MERN stack**.  
-It allows managing **user accounts**, **hotel information**, and includes a **basic login system** along with other fundamental features.
-
----
-
-## ✨ Features
-- User authentication (login & signup)
-- Manage user profiles
-- Add, update, and delete hotel information
-- View hotel listings
-- Basic UI for interaction
+A sample **Airbnb-style application** built using the **MERN stack**.  
+The project demonstrates user authentication, hotel management, and a basic booking-like flow.
 
 ---
 
-## 🛠 Tech Stack
-- **MongoDB** – Database for storing users & hotel data  
+## Features
+- 🔐 User authentication (login & signup)  
+- 🏨 Manage hotel details (add, update, delete)  
+- 👤 User profile management  
+- 📋 Browse hotel listings  
+
+---
+
+## Tech Stack
+- **MongoDB** – Database  
 - **Express.js** – Backend framework  
 - **React.js** – Frontend UI  
 - **Node.js** – Server runtime  
 
 ---
 
-## 📖 Note
-This project was created **by following a tutorial** for learning purposes only.  
-It is not intended for production use.
+## Setup
+```bash
+# Clone repository
+git clone https://github.com/BinaryBrainss/Hotels.git
 
----
+# Install backend dependencies
+cd Hotels
+npm install
 
-## 🚀 How to Run Locally
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/BinaryBrainss/Hotels.git
+# Install frontend dependencies
+cd client
+npm install
+
+# Start development server
+npm run dev
