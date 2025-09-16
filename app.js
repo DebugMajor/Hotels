@@ -7,6 +7,9 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapAsync");
 const { wrap } = require("module");
+const ExpressError = require("./utils/ExpressError");
+
+
 
 
 let port = 3000;
@@ -39,27 +42,31 @@ app.get("/",(req,res)=>{
     res.send("Hello")
 })
 
-//
+//Index Route
 app.get("/listings",async(req,res)=>{
    const allListing =  await Listings.find({});
    res.render("./listings/index.ejs",{allListing});
 })
 
 
-
+//New Route
 app.get("/listings/new",(req,res)=>{
     res.render("listings/new.ejs");
 })
 
-
-app.get("/listings/:id",async(req,res)=>{
+//Show Route
+app.get("/listings/:id",wrapAsync(async(req,res)=>{
     let {id} = req.params;
     let listing = await Listings.findById(id);
     res.render("./listings/show.ejs",{listing});
-})
+}));
 
 //Create Route
 app.post("/listings", wrapAsync(async (req, res, next) => {
+    if(!req.body.listing)
+    {
+        throw new ExpressError(err);
+    }
     const newlisting = new Listings(req.body.listing);
     await newlisting.save();
     res.redirect("/listings");
@@ -67,34 +74,44 @@ app.post("/listings", wrapAsync(async (req, res, next) => {
 
 
 //Edit Route
-app.get("/listings/:id/edit",async(req,res)=>{
+app.get("/listings/:id/edit",wrapAsync(async(req,res)=>{
     let {id} = req.params;
     const listing = await Listings.findById(id);
     res.render("listings/edit.ejs",{listing});
-})
+}));
 
-app.put("/listings/:id",async(req,res)=>{
+//Update Route
+app.put("/listings/:id",wrapAsync(async(req,res)=>{
     let {id} = req.params;
     await Listings.findByIdAndUpdate(id,req.body.listing);
     res.redirect("/listings");
-})
+}));
 
-
-app.delete("/listings/:id",async(req,res)=>{
+//Delete Route
+app.delete("/listings/:id",wrapAsync(async(req,res)=>{
     let {id} = req.params;
     let deletedEntry = await Listings.findByIdAndDelete(id);
     console.log(deletedEntry);
     res.redirect("/listings");
-})
+}));
+
+//For random req with no path
+app.use((req, res, next) => {
+    next(new ExpressError(404, "Page Not Found"));
+});
 
 
+//Error Handling Middleware
 app.use((err,req,res,next) =>
 {
-    res.send("Something went wrong");
+    const{statusCode = 500, message = "Something Went Wrong!"} = err;
+    // res.status(statusCode).send(message);
+    res.send(statusCode).render("Listings/Error",{err});
+
 })
 
 
-
+//Start the app
 app.listen(port,()=>{
     console.log(`App started at ${port}.`);
 })
