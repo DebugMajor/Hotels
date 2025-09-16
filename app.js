@@ -8,8 +8,7 @@ const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapAsync");
 const { wrap } = require("module");
 const ExpressError = require("./utils/ExpressError");
-
-
+const ListingSchema = require("./schema");
 
 
 let port = 3000;
@@ -24,6 +23,18 @@ app.use(methodOverride("_method"));
 app.engine('ejs',ejsMate);
 app.use(express.static(path.join(__dirname,"public")));
 
+
+const validateListing = (req,res,err) =>{
+    let {error} = ListingSchema.validate(req.body);
+    
+    if(err)
+    {
+        let errMsg = error.details.map((el)=>el.message).join(",");
+        throw new ExpressError(400,result.errMsg);
+    }
+    else
+        next();
+}
 
 
 
@@ -62,11 +73,8 @@ app.get("/listings/:id",wrapAsync(async(req,res)=>{
 }));
 
 //Create Route
-app.post("/listings", wrapAsync(async (req, res, next) => {
-    if(!req.body.listing)
-    {
-        throw new ExpressError(err);
-    }
+app.post("/listings", validateListing,wrapAsync(async (req, res, next) => {
+    
     const newlisting = new Listings(req.body.listing);
     await newlisting.save();
     res.redirect("/listings");
@@ -81,7 +89,7 @@ app.get("/listings/:id/edit",wrapAsync(async(req,res)=>{
 }));
 
 //Update Route
-app.put("/listings/:id",wrapAsync(async(req,res)=>{
+app.put("/listings/:id",validateListing, wrapAsync(async(req,res)=>{
     let {id} = req.params;
     await Listings.findByIdAndUpdate(id,req.body.listing);
     res.redirect("/listings");
@@ -106,7 +114,8 @@ app.use((err,req,res,next) =>
 {
     const{statusCode = 500, message = "Something Went Wrong!"} = err;
     // res.status(statusCode).send(message);
-    res.send(statusCode).render("Listings/Error",{err});
+    res.status(statusCode).render("listings/error", { err });
+
 
 })
 
