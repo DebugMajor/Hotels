@@ -8,7 +8,10 @@ const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapAsync");
 const { wrap } = require("module");
 const ExpressError = require("./utils/ExpressError");
-const ListingSchema = require("./schema");
+const {listingSchema,reviewSchema} = require("./schema"); //JOI validations schema
+const Review = require("./Models/review");
+const Listing = require("./Models/listings");
+const review = require("./Models/review");
 
 
 let port = 3000;
@@ -24,18 +27,27 @@ app.engine('ejs',ejsMate);
 app.use(express.static(path.join(__dirname,"public")));
 
 
-const validateListing = (req,res,err) =>{
-    let {error} = ListingSchema.validate(req.body);
+const validateListing = (req, res, next) => {
+    let { error } = listingSchema.validate(req.body);
     
-    if(err)
-    {
-        let errMsg = error.details.map((el)=>el.message).join(",");
-        throw new ExpressError(400,result.errMsg);
-    }
-    else
+    if (error) {   // <-- should check error, not err
+        let errMsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, errMsg); // <-- pass errMsg directly
+    } else {
         next();
+    }
 }
 
+const validateReview = (req, res, next) => {
+    let { error } = reviewSchema.validate(req.body);
+
+    if (error) {   // <-- fix here too
+        let errMsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, errMsg);
+    } else {
+        next();
+    }
+}
 
 
 main().then(()=>{
@@ -65,12 +77,12 @@ app.get("/listings/new",(req,res)=>{
     res.render("listings/new.ejs");
 })
 
-//Show Route
-app.get("/listings/:id",wrapAsync(async(req,res)=>{
-    let {id} = req.params;
-    let listing = await Listings.findById(id);
-    res.render("./listings/show.ejs",{listing});
-}));
+// //Show Route
+// app.get("/listings/:id",wrapAsync(async(req,res)=>{
+//     let {id} = req.params;
+//     let listing = await Listings.findById(id);
+//     res.render("./listings/show.ejs",{listing});
+// }));
 
 //Create Route
 app.post("/listings", validateListing,wrapAsync(async (req, res, next) => {
@@ -103,6 +115,39 @@ app.delete("/listings/:id",wrapAsync(async(req,res)=>{
     res.redirect("/listings");
 }));
 
+
+//Reviews POST Route
+app.post("/listings/:id/reviews", validateReview, wrapAsync(async(req,res)=>{
+    const listing = await Listing.findById(req.params.id); // no populate needed here
+    const newReview = new Review(req.body.review);
+
+    await newReview.save();
+    listing.reviews.push(newReview);
+    await listing.save();
+    
+    res.redirect(`/listings/${listing._id}`);
+}));
+
+app.get("/listings/:id", wrapAsync(async (req, res) => {
+    const { id } = req.params;
+    const listing = await Listing.findById(id).populate("reviews");
+    if (!listing) {
+        throw new ExpressError(404, "Listing Not Found");
+    }
+    res.render("listings/show", { listing });
+}));
+
+
+//Deleting Review
+app.delete("/listings/:id/reviews/:reviewId",wrapAsync(async(req,res)=>{
+    let{id,reviewId} = req.params;
+    await Listing.findByIdAndUpdate(id,{$pull:{reviews:reviewId}}); //Removing review from the listing array
+    await Review.findByIdAndDelete(reviewId);
+
+    res.redirect(`/listings/${id}`);
+}));
+
+
 //For random req with no path
 app.use((req, res, next) => {
     next(new ExpressError(404, "Page Not Found"));
@@ -118,7 +163,6 @@ app.use((err,req,res,next) =>
 
 
 })
-
 
 //Start the app
 app.listen(port,()=>{
