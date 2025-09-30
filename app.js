@@ -4,6 +4,8 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
+const session = require("express-session");
+const flash = require("connect-flash");
 
 const listingRoutes = require("./Routes/listing.js");
 const reviewRoutes = require("./Routes/reviews.js");
@@ -23,9 +25,32 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
+
+//Express Session
+const sessionOptions = {
+    secret : "Alfie @812#",
+    resave : true,
+    saveUninitialized: false, 
+    cookie : {
+        expires:  new Date(Date.now() + 7*24*60*60*1000),
+        maxAge :7*24*60*60*1000,
+        httpOnly : true
+    }
+}
+app.use(session(sessionOptions)); 
+app.use(flash());
+
+app.use((req, res, next) => {
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    next();
+});
+
 // ROUTES
 app.use("/listings", listingRoutes);
 app.use("/listings/:id/reviews", reviewRoutes);
+
+
 
 // Home Page
 app.get("/", (req, res) => {

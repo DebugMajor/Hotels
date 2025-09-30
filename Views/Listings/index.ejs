@@ -1,5 +1,9 @@
 <% layout("/Layouts/boilerplate") %>
 
+<% if (typeof success !== 'undefined' && success.length > 0) { %>
+    <div class="alert alert-success"><%= success[0] %></div>
+<% } %>
+
 <h3>All Listings</h3> <br>
 
 <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 row-cols-xs-1">
@@ -11,7 +15,6 @@
                 alt="listing_image" 
                 style="height:20rem;"
                 />
-
                 <div class="card-img-overlay"></div>
                 <div class="card-body">
                     <h5 class="card-title"><%= listing.title %></h5>
@@ -21,6 +24,4 @@
             </div>
         </a>
     <% } %>
-
-    
 </div>

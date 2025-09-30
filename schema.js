@@ -3,7 +3,7 @@ const Joi = require('joi');
 module.exports.listingSchema = Joi.object({ 
     //Listing is compulsorily required : 
     listing : Joi.object({
-        
+        title : Joi.string().required(),
         price : Joi.number().required(),
         description : Joi.string().required(),
         location : Joi.string().required(),
