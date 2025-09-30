@@ -6,9 +6,15 @@ const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./Models/user.js");
 
+//Router Routes
 const listingRoutes = require("./Routes/listing.js");
 const reviewRoutes = require("./Routes/reviews.js");
+const userRoutes = require("./Routes/user.js");
+
 
 const app = express();
 const mongo_url = "mongodb://127.0.0.1:27017/wanderlust";
@@ -40,15 +46,27 @@ const sessionOptions = {
 app.use(session(sessionOptions)); 
 app.use(flash());
 
+
+//Flash Messaage
 app.use((req, res, next) => {
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
     next();
 });
 
+
+//Passport use
+passport.initialize();
+passport.session();
+passport.use(new LocalStrategy(User.authenticate));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 // ROUTES
 app.use("/listings", listingRoutes);
 app.use("/listings/:id/reviews", reviewRoutes);
+app.use("/",userRoutes);
 
 
 
