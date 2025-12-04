@@ -46,22 +46,22 @@ const sessionOptions = {
 app.use(session(sessionOptions)); 
 app.use(flash());
 
+//Passport Setup
+
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 //Flash Messaage
 app.use((req, res, next) => {
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
+    res.locals.currUser = req.user;
     next();
 });
-
-
-//Passport use
-passport.initialize();
-passport.session();
-passport.use(new LocalStrategy(User.authenticate));
-
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
 
 // ROUTES
 app.use("/listings", listingRoutes);
