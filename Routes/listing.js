@@ -10,10 +10,17 @@ const {isLoggedIn,isOwner,validateListing} = require("../middleware");
 
 const listingController = require("../controllers/listings");
 
+const multer = require('multer');
+const {storage} = require('../cloudConfig.js')
+const upload = multer({storage});
+
 
 router.route("/")
     .get(wrapAsync(listingController.index))
-    .post(validateListing,isLoggedIn("Logint to CREATE a new LISTING"),listingController.newListing);
+    // .post(validateListing,isLoggedIn("Logint to CREATE a new LISTING"),listingController.newListing);
+    .post(upload.single('listing[image]'),(req,res)=>{
+        res.send(req.file);
+    })
 
 // NEW Route
 router.get("/new", isLoggedIn("Logint to add a NEW listing"),listingController.renderNewForm);
