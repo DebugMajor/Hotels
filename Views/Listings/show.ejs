@@ -1,5 +1,9 @@
 <% layout("Layouts/boilerplate") %>
-
+<script>
+    const mapTokenn = "<%= process.env.MAP_TOKEN%>";
+    const listing = <%- JSON.stringify(listing) %>;
+    
+</script>
 <div class="page-content container my-5">
 
     <!-- Listing Details -->
@@ -74,8 +78,10 @@
         </form>
     <%}%>
     </div>
+    
 
     <!-- Reviews Section -->
+    <%if(listing.reviews.length>0) {%>
     <div class="card shadow-sm p-4">
         <h3 class="mb-4">All Reviews</h3>
         <ul class="list-unstyled">
@@ -100,6 +106,18 @@
                 <li class="text-muted">No reviews yet. Be the first to leave one!</li>
             <% } %>
         </ul>
+        
+        
+   
     </div>
+    <%}%>
+    <div class="card shadow-sm p-4">
+            <h3>Where you'll be</h3>
+            <div id="map">
 
+            </div>
+        
+    </div>
+     
 </div>
+<script src="/js/map.js"></script>

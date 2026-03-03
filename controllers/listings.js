@@ -1,54 +1,141 @@
 const Listing = require("../Models/listings");
+const mbxGeoCoding = require('@mapbox/mapbox-sdk/services/geocoding');
 
+const mapToken = process.env.MAP_TOKEN;
+const geocodingClient = mbxGeoCoding({ accessToken: mapToken });
+
+
+// =======================
+// INDEX
+// =======================
 module.exports.index = async (req, res) => {
     const allListing = await Listing.find();
     res.render("listings/index", { allListing });
 };
 
 
+// =======================
+// NEW FORM
+// =======================
 module.exports.renderNewForm = (req, res) => {
     res.render("listings/new");
 };
 
-module.exports.showListings = (async (req, res) => {
+
+// =======================
+// SHOW
+// =======================
+module.exports.showListings = async (req, res) => {
     const { id } = req.params;
-    const listing = await Listing.findById(id).populate({path:"reviews",populate:{path:"author"}}).populate("owner");
-    if (!listing){
-        req.flash("error","Listing you requested for does not exsist");
+
+    const listing = await Listing.findById(id)
+        .populate({ path: "reviews", populate: { path: "author" } })
+        .populate("owner");
+
+    if (!listing) {
+        req.flash("error", "Listing you requested does not exist");
         return res.redirect("/listings");
     }
-    console.log(listing);
+
     res.render("listings/show", { listing });
-});
+};
 
-module.exports.newListing =(async (req, res) => {
+ 
+// =======================
+// CREATE
+// =======================
+module.exports.newListing = async (req, res) => {
+
+    // 1️⃣ Geocode location
+    let geoResponse = await geocodingClient.forwardGeocode({
+        query: req.body.listing.location,
+        limit: 1
+    }).send();
+
+    // 2️⃣ Create new listing
     const newListing = new Listing(req.body.listing);
-    newListing.owner =req.user;
-    await newListing.save();
-    req.flash("success","New listing created!!");
-    res.redirect("/listings");
-});
 
-module.exports.editForm = (async (req, res) => {
+    // 3️⃣ Save geometry from Mapbox
+    if (geoResponse.body.features.length > 0) {
+        newListing.geometry = geoResponse.body.features[0].geometry;
+        
+    }   
+
+    // 4️⃣ Save image if uploaded
+    if (req.file) {
+        newListing.image = {
+            url: req.file.path,
+            filename: req.file.filename
+        };
+    }
+
+    // 5️⃣ Assign owner
+    newListing.owner = req.user._id;
+
+    // 6️⃣ Save to DB
+    let savedListing = await newListing.save();
+    console.log(savedListing);
+    req.flash("success", "New listing created!");
+    res.redirect("/listings");
+};
+
+
+// =======================
+// EDIT FORM
+// =======================
+module.exports.editForm = async (req, res) => {
     const { id } = req.params;
+
     const listing = await Listing.findById(id);
-    if (!listing){
-        req.flash("error","Listing you requested for does not exsist");
+
+    if (!listing) {
+        req.flash("error", "Listing you requested does not exist");
         return res.redirect("/listings");
     }
-    res.render("listings/edit", { listing });
-});
 
-module.exports.updateListing = (async (req, res) => {
-    let { id } = req.params;     
-    await Listing.findByIdAndUpdate(id, req.body.listing, { new: true, runValidators: true });
-    req.flash("success","Listing Updated!!");
+    // Resize cloudinary image for preview
+    let OGurl = listing.image.url;
+    OGurl = OGurl.replace("/upload", "/upload/h_350,w_250");
+
+    res.render("listings/edit", { listing, OGurl });
+};
+
+
+// =======================
+// UPDATE
+// =======================
+module.exports.updateListing = async (req, res) => {
+
+    let { id } = req.params;
+
+    let listing = await Listing.findByIdAndUpdate(
+        id,
+        req.body.listing,
+        { new: true, runValidators: true }
+    );
+
+    // If new image uploaded
+    if (req.file) {
+        listing.image = {
+            url: req.file.path,
+            filename: req.file.filename
+        };
+        await listing.save();
+    }
+
+    req.flash("success", "Listing Updated!");
     res.redirect(`/listings/${id}`);
-});
+};
 
-module.exports.destroyListing = (async (req, res) => {
+
+// =======================
+// DELETE
+// =======================
+module.exports.destroyListing = async (req, res) => {
     const { id } = req.params;
+
     await Listing.findByIdAndDelete(id);
-    req.flash("success","Listing Deleted!!");
+
+    req.flash("success", "Listing Deleted!");
     res.redirect("/listings");
-});
+};

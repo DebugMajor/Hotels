@@ -3,7 +3,7 @@
 <br><br>
 <h3>Edit the Listing</h3>
 <br>
-<form action="/listings" method="POST" novalidate class="needs-validation">
+<form action="/listings" method="POST" novalidate class="needs-validation" enctype="multipart/form-data">
 
     <div class="row">
         <div class="col-8 offset-2">
@@ -19,10 +19,17 @@
                 <div class="invalid-feedback">Enter a valid description.</div>
             </div>
             
+            <div>
+                <br>
+                <h3>Listing Image :</h3>
+                <image src="<%=OGurl%>"></image>
+                <br>
+            </div>
             <div class="mb-3">
+                <br>
                 <label for="image" class="form-label">Image URL:</label>
-                <input type="text" name="listing[image]" value="<%= listing.image %>" class="form-control" required>
-                <div class="invalid-feedback">Enter a valid image URL.</div>
+                <input type="file" name="listing[image]" class="form-control">
+                <div class="invalid-feedback">Upload a new image: </div>
             </div>
             
             <div class="row">
@@ -46,6 +53,7 @@
             </div>
 
             <button class="btn btn-warning">Edit</button>
+            <br>
         </div>
     </div>
 </form>
