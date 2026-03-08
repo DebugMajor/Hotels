@@ -6,41 +6,58 @@ const { number } = require("joi");
 const listingSchema = new Schema({
     title: { type: String, required: true },
     description: String,
-    price: { type: Number, required: true }, 
+    price: { type: Number, required: true },
     image: {
         url: String,
-        filename : String,
+        filename: String,
     },
     location: String,
     country: String,
-    reviews : [
+    reviews: [
         {
-            type : Schema.Types.ObjectId,
-            ref : "Review"
+            type: Schema.Types.ObjectId,
+            ref: "Review"
         }
     ],
-    owner : {
-        type : Schema.Types.ObjectId,
-        ref : "User"
+    owner: {
+        type: Schema.Types.ObjectId,
+        ref: "User"
     },
-    geometry:{
-        type:{
-            type : String,
-            enum : ["Point"],
-            required : true,
+    geometry: {
+        type: {
+            type: String,
+            enum: ["Point"],
+            default: "Point"
         },
-        coordinates : {
-            type : [Number],
-            required : true
+        coordinates: {
+            type: [Number],
+            default: [0, 0]
         },
+    },
+    category: {
+        type: [String],
+        enum: [
+            'Trending',
+            'Rooms',
+            'Iconic Cities',
+            'Mountains',
+            'Forts',
+            'Pools',
+            'Farms',
+            'Camping',
+            'Snowfall',
+            'Beach',
+            'Domes',
+            'Boat',
+            'Zoo'
+        ]
     }
 });
 
 //Adding Mongoose Middleware to remove all reviews once parent listing is deleted.
-listingSchema.post("findOneAndDelete",async(listing)=>{
-    if(listing)
-    {
-        await Review.deleteMany({reviews:{$in:listing.reviews}});
+listingSchema.post("findOneAndDelete", async (listing) => {
+    if (listing) {
+        await Review.deleteMany({ reviews: { $in: listing.reviews } });
     }
 });
 

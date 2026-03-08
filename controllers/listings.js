@@ -44,6 +44,9 @@ module.exports.showListings = async (req, res) => {
 // =======================
 // CREATE
 // =======================
+// =======================
+// CREATE
+// =======================
 module.exports.newListing = async (req, res) => {
 
     // 1️⃣ Geocode location
@@ -58,8 +61,14 @@ module.exports.newListing = async (req, res) => {
     // 3️⃣ Save geometry from Mapbox
     if (geoResponse.body.features.length > 0) {
         newListing.geometry = geoResponse.body.features[0].geometry;
-        
-    }   
+    } 
+    else {
+        // fallback if location not found
+        newListing.geometry = {
+            type: "Point",
+            coordinates: [0, 0]
+        };
+    }
 
     // 4️⃣ Save image if uploaded
     if (req.file) {
@@ -74,7 +83,9 @@ module.exports.newListing = async (req, res) => {
 
     // 6️⃣ Save to DB
     let savedListing = await newListing.save();
+
     console.log(savedListing);
+
     req.flash("success", "New listing created!");
     res.redirect("/listings");
 };

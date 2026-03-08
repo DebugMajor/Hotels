@@ -23,7 +23,7 @@ const userRoutes = require("./Routes/user.js");
 
 
 const app = express();
-const mongo_url = "mongodb://127.0.0.1:27017/wanderlust";
+// const mongo_url = "mongodb://127.0.0.1:27017/wanderlust";
 
 // DB connection
 mongoose.connect(mongo_url)
@@ -73,13 +73,6 @@ app.use((req, res, next) => {
 app.use("/listings", listingRoutes);
 app.use("/listings/:id/reviews", reviewRoutes);
 app.use("/",userRoutes);
-
-
-
-// Home Page
-app.get("/", (req, res) => {
-    res.send("Hello");
-});
 
 // 404 handler
 app.use((req, res, next) => {
