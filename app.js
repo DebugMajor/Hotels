@@ -1,5 +1,4 @@
-if(process.env.NODE_ENV !== "production")
-{
+if (process.env.NODE_ENV !== "production") {
     require("dotenv").config();
 }
 
@@ -42,7 +41,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 
 //Map Token
-app.use((req,res,next)=>{
+app.use((req, res, next) => {
     res.locals.mapToken = process.env.MAP_TOKEN;
     next();
 });
@@ -56,25 +55,25 @@ const store = MongoStore.create({
     touchAfter: 24 * 3600
 });
 
-store.on("error",()=>{
-    console.log("ERROR in MONGO SESSION STORE",err);
-})
+store.on("error", (err) => {
+    console.log("ERROR in MONGO SESSION STORE", err);
+});
 
 //Express Session
 const sessionOptions = {
     store,
-    secret : process.env.SECRET,
-    resave : true,
-    saveUninitialized: false, 
-    cookie : {
-        expires:  new Date(Date.now() + 7*24*60*60*1000),
-        maxAge :7*24*60*60*1000,
-        httpOnly : true
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true
     }
 }
 
 
-app.use(session(sessionOptions)); 
+app.use(session(sessionOptions));
 app.use(flash());
 
 //Passport Setup
@@ -94,10 +93,14 @@ app.use((req, res, next) => {
     next();
 });
 
+app.get("/", (req, res) => {
+    res.redirect("/listings");
+});
+
 // ROUTES
 app.use("/listings", listingRoutes);
 app.use("/listings/:id/reviews", reviewRoutes);
-app.use("/",userRoutes);
+app.use("/", userRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
