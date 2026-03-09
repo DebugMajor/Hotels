@@ -1,8 +1,7 @@
-if(process.env.NODE_EVN !="production")
+if(process.env.NODE_ENV !== "production")
 {
-    require('dotenv').config();
+    require("dotenv").config();
 }
-
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -15,7 +14,7 @@ const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./Models/user.js");
-
+const MongoStore = require("connect-mongo").default;
 //Router Routes
 const listingRoutes = require("./Routes/listing.js");
 const reviewRoutes = require("./Routes/reviews.js");
@@ -24,9 +23,12 @@ const userRoutes = require("./Routes/user.js");
 
 const app = express();
 // const mongo_url = "mongodb://127.0.0.1:27017/wanderlust";
+const dbUrl = process.env.ATLAS_DB_URL;
+
+
 
 // DB connection
-mongoose.connect(mongo_url)
+mongoose.connect(dbUrl)
     .then(() => console.log("Connected to DB"))
     .catch(err => console.log(err));
 
@@ -38,9 +40,30 @@ app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
 
+
+//Map Token
+app.use((req,res,next)=>{
+    res.locals.mapToken = process.env.MAP_TOKEN;
+    next();
+});
+
+//Mongo Session
+const store = MongoStore.create({
+    mongoUrl: dbUrl,
+    crypto: {
+        secret: process.env.SECRET
+    },
+    touchAfter: 24 * 3600
+});
+
+store.on("error",()=>{
+    console.log("ERROR in MONGO SESSION STORE",err);
+})
+
 //Express Session
 const sessionOptions = {
-    secret : "Alfie @812#",
+    store,
+    secret : process.env.SECRET,
     resave : true,
     saveUninitialized: false, 
     cookie : {
@@ -49,6 +72,8 @@ const sessionOptions = {
         httpOnly : true
     }
 }
+
+
 app.use(session(sessionOptions)); 
 app.use(flash());
 
@@ -84,6 +109,7 @@ app.use((err, req, res, next) => {
     const { statusCode = 500, message = "Something Went Wrong!" } = err;
     res.status(statusCode).render("listings/error", { err });
 });
+
 
 // Start Server
 app.listen(3000, () => {
