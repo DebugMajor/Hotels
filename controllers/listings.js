@@ -9,10 +9,28 @@ const geocodingClient = mbxGeoCoding({ accessToken: mapToken });
 // INDEX
 // =======================
 module.exports.index = async (req, res) => {
-    const allListing = await Listing.find();
-    res.render("listings/index", { allListing });
-};
 
+    const search = req.query.search ? req.query.search.trim() : "";
+
+    let allListing;
+
+    if (search) {
+        allListing = await Listing.find({
+            $or: [
+                { title: { $regex: search, $options: "i" } },
+                { location: { $regex: search, $options: "i" } },
+                { country: { $regex: search, $options: "i" } }
+            ]
+        });
+    } else {
+        allListing = await Listing.find({});
+    }
+
+    res.render("listings/index", {
+        allListing,
+        search
+    });
+};
 
 // =======================
 // NEW FORM
@@ -40,7 +58,7 @@ module.exports.showListings = async (req, res) => {
     res.render("listings/show", { listing });
 };
 
- 
+
 // =======================
 // CREATE
 // =======================
@@ -61,7 +79,7 @@ module.exports.newListing = async (req, res) => {
     // 3️⃣ Save geometry from Mapbox
     if (geoResponse.body.features.length > 0) {
         newListing.geometry = geoResponse.body.features[0].geometry;
-    } 
+    }
     else {
         // fallback if location not found
         newListing.geometry = {

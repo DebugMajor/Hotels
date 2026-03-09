@@ -93,6 +93,11 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use((req, res, next) => {
+    res.locals.search = req.query.search || "";
+    next();
+});
+
 app.get("/", (req, res) => {
     res.redirect("/listings");
 });

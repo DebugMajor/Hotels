@@ -13,11 +13,12 @@
     background-color: #fe424d;
     color: #fff;
   }
-  .search-input
-  {
+
+  .search-input {
     border-radius: 15px;
-    
+
   }
+
   .btn-search i {
     font-size: 0.9rem;
   }
@@ -37,9 +38,15 @@
       </div>
 
       <div class="navbar-nav ms-auto">
-        <form class="d-flex" role="search">
-          <input class="form-control me-2 search-input" type="search" placeholder="Search Destination" aria-label="Search" />
-          <button class="btn btn-search" type="submit">Search <i class="fa-solid fa-magnifying-glass"></i></button>
+        <form class="d-flex" role="search" action="/listings" method="GET">
+
+          <input class="form-control me-2 search-input" type="search" name="search" value="<%= search || '' %>"
+            placeholder="Search Destination" />
+
+          <button class="btn btn-search" type="submit">
+            Search <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+
         </form>
       </div>
 
